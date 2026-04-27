@@ -46,7 +46,28 @@ def get_free_games():
                     image_url = img["url"]
                     break
 
-            free_games.append({"title": title, "description": description, "image_url": image_url})
+            page_slug = ""
+            catalog_ns = game.get("catalogNs", {}).get("mappings", [])
+            if catalog_ns:
+                page_slug = catalog_ns[0].get("pageSlug", "")
+
+            if not page_slug:
+                offer_mappings = game.get("offerMappings", [])
+                if offer_mappings:
+                    page_slug = offer_mappings[0].get("pageSlug", "")
+
+            if not page_slug:
+                page_slug = game.get("productSlug") or game.get("urlSlug") or ""
+
+            game_url = (
+                f"https://store.epicgames.com/en-US/p/{page_slug}"
+                if page_slug
+                else "https://store.epicgames.com/en-US/free-games"
+            )
+
+            free_games.append(
+                {"title": title, "description": description, "image_url": image_url, "game_url": game_url}
+            )
 
     return free_games
 
@@ -73,14 +94,18 @@ def send_email(games):
     """
 
     for game in games:
-        html_content += f"<h3 style='color: #0078F2;'>{game['title']}</h3>"
+        game_url = game.get("game_url", "https://store.epicgames.com/en-US/free-games")
+        html_content += f"<h3 style='color: #0078F2;'><a href='{game_url}' style='color: #0078F2; text-decoration: none;'>{game['title']}</a></h3>"
         html_content += f"<p>{game['description']}</p>"
         if game["image_url"]:
-            html_content += f"<img src='{game['image_url']}' width='400' style='border-radius: 8px;'><br><br>"
+            html_content += (
+                f"<a href='{game_url}'><img src='{game['image_url']}' width='400' style='border-radius: 8px;'></a><br>"
+            )
+        html_content += f"<p><a href='{game_url}' style='display: inline-block; padding: 10px 15px; background-color: #0078F2; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>Claim {game['title']}</a></p><br><br>"
 
     html_content += """
         <hr>
-        <p><a href="https://store.epicgames.com/en-US/free-games">Click here to claim them!</a></p>
+        <p><a href="https://store.epicgames.com/en-US/free-games" style="color: #0078F2;">View all free games on the Epic Games Store</a></p>
       </body>
     </html>
     """
