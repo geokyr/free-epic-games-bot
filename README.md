@@ -1,4 +1,4 @@
-# Free Epic Games Bot 🎮
+# Free Epic Games Bot
 
 A lightweight Python bot that automatically fetches the current free games from the Epic Games Store and sends a nicely formatted HTML email notification with game details and claim links. Designed to run seamlessly on GitHub Actions.
 
