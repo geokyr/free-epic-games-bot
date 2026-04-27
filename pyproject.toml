@@ -1,0 +1,9 @@
+[project]
+name = "free-epic-games-bot"
+version = "0.1.0"
+description = "Free Epic Games bot with email notifications running on GitHub Actions"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests>=2.33.1",
+]
