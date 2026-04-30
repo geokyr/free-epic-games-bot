@@ -2,7 +2,7 @@ name: Epic Games Free Bot
 
 on:
   schedule:
-    - cron: '10 16 * * 4'
+    - cron: '16 16 * * 4'
   workflow_dispatch:
 
 jobs:
