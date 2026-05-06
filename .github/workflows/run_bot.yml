@@ -1,8 +1,8 @@
-name: Epic Games Free Bot
+name: Run Bot
 
 on:
-  schedule:
-    - cron: '16 16 * * 4'
+  repository_dispatch:
+    types: [trigger-run-bot]
   workflow_dispatch:
 
 jobs:
@@ -24,4 +24,4 @@ jobs:
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
-        run: uv run epic_bot.py
+        run: uv run bot.py
