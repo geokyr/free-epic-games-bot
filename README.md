@@ -1,36 +1,77 @@
 # Free Epic Games Bot
 
-A lightweight Python bot that automatically fetches the current free games from the Epic Games Store and sends a nicely formatted HTML email notification with game details and claim links. Designed to run seamlessly on GitHub Actions.
+A lightweight Python bot that fetches the current free games from the Epic Games Store and sends a formatted HTML email with claim links.
+
+To run the bot a GitHub workflow is provided. It can be triggered through cron-job.org using a GitHub `repository_dispatch` event, and it can also be run manually with `workflow_dispatch`.
 
 ## Features
-- **Automated Fetching:** Retrieves the latest free game promotions directly from the Epic Games API.
-- **Email Notifications:** Sends an HTML email with game artwork, descriptions, and direct links to claim the games.
-- **GitHub Actions Ready:** Perfect for running as a scheduled cron job to keep you updated weekly.
 
-## Setup Requirements
+- Automated fetching from the Epic Games promotions API.
+- HTML email notifications with game title, description, image, and claim button.
+- Triggered GitHub Actions run via cron-job.org or the manual GitHub Actions run button.
 
-To run the bot, you need to configure the following environment variables:
+## Environment Variables
 
-- `SENDER_EMAIL`: The email address (e.g., Gmail) used to send the notifications.
-- `SENDER_PASSWORD`: The app password for the sender email.
-- `RECEIVER_EMAIL`: The destination email address to receive the game alerts.
+Set these values in the environment where the bot runs:
+
+- `SENDER_EMAIL`: Sender email address (for example, a Gmail account).
+- `SENDER_PASSWORD`: App password for the sender email.
+- `RECEIVER_EMAIL`: Destination email address.
 
 ## Running Locally
 
-Set the environment variables and run the script:
+1. Export/set the required environment variables.
+2. Run:
 
 ```bash
-uv run epic_bot.py
+uv run bot.py
 ```
 
-## Deployment
+## Deployment with GitHub Actions and cron-job.org
 
-To deploy this bot on GitHub Actions, follow these steps:
+To deploy this bot, first fork or clone this repository.
 
-1.  Fork or clone this repository.
-2.  Navigate to **Settings > Secrets and variables > Actions**.
-3.  Add the following secrets:
-    -   `SENDER_EMAIL`
-    -   `SENDER_PASSWORD`
-    -   `RECEIVER_EMAIL`
-4.  Commit and push the changes. The action will run automatically based on the cron schedule defined in `.github/workflows/schedule.yml`.
+The workflow file is [run_bot.yml](.github/workflows/run_bot.yml).
+
+It supports:
+- `repository_dispatch` with event type `trigger-run-bot`
+- `workflow_dispatch` for manual runs from GitHub UI
+
+### 1. Add GitHub repository secrets
+
+In your repository, go to **Settings > Secrets and variables > Actions**, then add:
+
+- `SENDER_EMAIL`
+- `SENDER_PASSWORD`
+- `RECEIVER_EMAIL`
+
+### 2. Create a GitHub Personal Access Token (PAT)
+
+Create a PAT that can trigger repository dispatch events for this repository.
+
+Go to **Settings > Developer settings > Personal access tokens > Fine-grained tokens**. Create a new token, set an expiration date, grant access to this repository only, and enable the Contents permissions (Read and write). When done, copy the generated PAT as you will need it for the next step.
+
+### 3. Configure cron-job.org
+
+Create a new cron-job.org job with:
+
+- URL: `https://api.github.com/repos/<YOUR_GITHUB_USERNAME>/<YOUR_REPO_NAME>/dispatches`
+- Execution schedule: set a preferred time on Thursday after Epic's weekly refresh at 15:00 UTC
+- Advanced > Headers:
+  - `Accept: application/vnd.github+json`
+  - `Authorization: Bearer <YOUR_PAT>`
+  - `Content-Type: application/json`
+- Method: `POST`
+- Body:
+
+```json
+{
+  "event_type": "trigger-run-bot"
+}
+```
+
+When cron-job.org sends this request, GitHub starts the workflow and the bot runs with your configured secrets.
+
+## Manual Trigger
+
+You can still run the bot manually from **Actions > Run Bot > Run workflow**.
